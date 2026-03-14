@@ -142,7 +142,7 @@ class AuthService {
       });
 
       return response.ok;
-    } catch (_error) {
+    } catch {
       this.logout();
       return false;
     }
