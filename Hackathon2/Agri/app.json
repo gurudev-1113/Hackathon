@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "4083541d-eac3-4740-a9d1-3e3bc1464de1"
+      }
+    },
+    "android": {
+      "package": "com.OrbiPulse"
+    },
+    "ios": {
+      "bundleIdentifier": "com.OrbiPulse",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

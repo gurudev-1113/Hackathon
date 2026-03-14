@@ -1,0 +1,183 @@
+import { UserCircle, Mail, Phone, Shield, Camera, Save, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+export default function Profile() {
+  const [user, setUser] = useState({
+    email: 'admin@gmail.com',
+    mobile: '+919876543210',
+    role: 'System Administrator',
+    name: 'Admin User'
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState({});
+
+  useEffect(() => {
+    // Read from local storage to show active logged in user details
+    const storedEmail = localStorage.getItem('userEmail');
+    const storedMobile = localStorage.getItem('userMobile');
+    
+    if (storedEmail) {
+      const userData = { 
+        email: storedEmail, 
+        mobile: storedMobile || 'Not provided',
+        name: storedEmail.split('@')[0],
+        role: storedEmail === 'admin@gmail.com' ? 'System Administrator' : 'Farm Operator'
+      };
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUser(userData);
+      setEditedUser(userData);
+    }
+  }, []);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedUser(user);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedUser(user);
+  };
+
+  const handleSave = () => {
+    setUser(editedUser);
+    localStorage.setItem('userEmail', editedUser.email);
+    localStorage.setItem('userMobile', editedUser.mobile);
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditedUser(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
+      <header className="mb-8 border-b border-border pb-6 flex items-center gap-4">
+        <UserCircle className="text-accent w-10 h-10" />
+        <div>
+          <h1 className="text-3xl font-bold text-textH">User Details</h1>
+          <p className="text-textH/60">Manage your account profile and preferences</p>
+        </div>
+      </header>
+
+      <div className="glass-card p-8 rounded-3xl relative overflow-hidden">
+        {/* Decorative background element */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        
+        <div className="flex flex-col md:flex-row gap-10 items-start relative z-10">
+          
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center space-y-4 shrink-0">
+             <div className="w-32 h-32 rounded-full bg-social-bg border-4 border-accent/20 flex items-center justify-center relative group cursor-pointer overflow-hidden shadow-xl">
+               <UserCircle size={80} className="text-textH/20 group-hover:scale-110 transition-transform" />
+               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white font-semibold text-sm gap-2">
+                 <Camera size={16} /> Edit
+               </div>
+             </div>
+             <div className="text-center">
+               <div className="font-bold text-textH/40 uppercase tracking-widest text-xs mb-1">Status</div>
+               <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold">
+                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+               </div>
+             </div>
+          </div>
+
+          {/* Form / Details Section */}
+          <div className="flex-1 w-full space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="space-y-2">
+                 <label className="text-sm font-semibold text-textH/60 ps-1">Full Name</label>
+                 {isEditing ? (
+                   <input
+                     type="text"
+                     value={editedUser.name}
+                     onChange={(e) => handleInputChange('name', e.target.value)}
+                     className="bg-main border border-accent/30 rounded-xl p-3 text-textH font-medium capitalize focus:outline-none focus:ring-2 focus:ring-accent/50"
+                   />
+                 ) : (
+                   <div className="bg-main border border-border rounded-xl p-3 text-textH/90 font-medium capitalize">
+                     {user.name}
+                   </div>
+                 )}
+               </div>
+               
+               <div className="space-y-2">
+                 <label className="text-sm font-semibold text-textH/60 ps-1 flex items-center gap-2"><Shield size={14} className="text-accent"/> Role</label>
+                 <div className="bg-social-bg border border-border rounded-xl p-3 text-accent font-bold">
+                   {user.role}
+                 </div>
+               </div>
+
+               <div className="space-y-2">
+                 <label className="text-sm font-semibold text-textH/60 ps-1 flex items-center gap-2"><Mail size={14} className="text-textH/40"/> Email Address</label>
+                 {isEditing ? (
+                   <input
+                     type="email"
+                     value={editedUser.email}
+                     onChange={(e) => handleInputChange('email', e.target.value)}
+                     className="bg-main border border-accent/30 rounded-xl p-3 text-textH font-medium text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                   />
+                 ) : (
+                   <div className="bg-main border border-border rounded-xl p-3 text-textH/90 font-medium text-sm">
+                     {user.email}
+                   </div>
+                 )}
+               </div>
+
+               <div className="space-y-2">
+                 <label className="text-sm font-semibold text-textH/60 ps-1 flex items-center gap-2"><Phone size={14} className="text-textH/40"/> Mobile Number</label>
+                 {isEditing ? (
+                   <input
+                     type="tel"
+                     value={editedUser.mobile}
+                     onChange={(e) => handleInputChange('mobile', e.target.value)}
+                     className="bg-main border border-accent/30 rounded-xl p-3 text-textH font-medium text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                   />
+                 ) : (
+                   <div className="bg-main border border-border rounded-xl p-3 text-textH/90 font-medium text-sm">
+                     {user.mobile}
+                   </div>
+                 )}
+               </div>
+            </div>
+
+            <div className="pt-6 border-t border-border mt-8 flex justify-end gap-4">
+               <button 
+                 onClick={() => {
+                   alert('Password reset functionality would be implemented here. This would typically send a reset link to your email.');
+                 }}
+                 className="px-6 py-2.5 rounded-xl text-textH/60 font-semibold hover:bg-social-bg transition-colors"
+               >
+                 Reset Password
+               </button>
+               {isEditing ? (
+                 <div className="flex gap-2">
+                   <button 
+                     onClick={handleCancel}
+                     className="px-6 py-2.5 rounded-xl text-textH/60 font-semibold hover:bg-social-bg transition-colors flex items-center gap-2"
+                   >
+                     <X size={16} /> Cancel
+                   </button>
+                   <button 
+                     onClick={handleSave}
+                     className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-600/20 flex items-center gap-2"
+                   >
+                     <Save size={16} /> Save Changes
+                   </button>
+                 </div>
+               ) : (
+                 <button 
+                   onClick={handleEdit}
+                   className="px-6 py-2.5 bg-accent hover:bg-blue-500 text-textH font-bold rounded-xl transition-colors shadow-lg shadow-accent/20"
+                 >
+                   Edit Profile
+                 </button>
+               )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,307 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent: #7c9cff;
+  --accent-bg: rgba(124, 156, 255, 0.1);
+  --accent-border: #7c9cff;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-h: #ffffff;
+  --social-bg: rgba(255, 255, 255, 0.06);
+  --shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --bg-main: #0f172a;
+}
+
+@layer base {
+  body {
+    background: var(--bg-main);
+    color: #cbd5f5;
+    font-family: "Inter", sans-serif;
+    @apply antialiased selection:bg-accent selection:text-white;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+/* User provided CSS styles */
+
+.counter {
+  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid rgba(124, 156, 255, 0.2);
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+}
+
+.counter:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow);
+}
+
+.counter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hero {
+  position: relative;
+}
+
+.hero .base,
+.hero .framework,
+.hero .vite {
+  inset-inline: 0;
+  margin: 0 auto;
+}
+
+.hero .base {
+  width: 170px;
+  position: relative;
+  z-index: 0;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+}
+
+.hero .framework,
+.hero .vite {
+  position: absolute;
+}
+
+.hero .framework {
+  z-index: 1;
+  top: 34px;
+  height: 28px;
+  transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+    scale(1.4);
+}
+
+.hero .vite {
+  z-index: 0;
+  top: 107px;
+  height: 26px;
+  width: auto;
+  transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+    scale(0.8);
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+}
+
+@media (max-width: 1024px) {
+  #center {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+
+#next-steps > div {
+  flex: 1 1 0;
+  padding: 32px;
+}
+
+@media (max-width: 1024px) {
+  #next-steps > div {
+    padding: 24px 20px;
+  }
+}
+
+#next-steps .icon {
+  margin-bottom: 16px;
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 1024px) {
+  #next-steps {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+  #docs {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  margin: 32px 0 0;
+}
+
+#next-steps ul .logo {
+  height: 18px;
+}
+
+#next-steps ul a {
+  color: var(--text-h);
+  font-size: 15px;
+  border-radius: 10px;
+  background: var(--social-bg);
+  display: flex;
+  padding: 8px 14px;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+#next-steps ul a:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+#next-steps ul .button-icon {
+  height: 18px;
+  width: 18px;
+}
+
+@media (max-width: 1024px) {
+  #next-steps ul {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #next-steps ul li {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  #next-steps ul a {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+  #spacer {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+}
+
+.ticks::before,
+.ticks::after {
+  content: "";
+  position: absolute;
+  top: -4.5px;
+  border: 5px solid transparent;
+}
+
+.ticks::before {
+  left: 0;
+  border-left-color: var(--border);
+}
+
+.ticks::after {
+  right: 0;
+  border-right-color: var(--border);
+}
+
+/* Custom Leaflet Markers */
+.marker-pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -16px 0 0 -16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: var(--accent);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.marker-pin::after {
+  content: '';
+  width: 26px;
+  height: 26px;
+  background: #0f172a;
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.marker-pin > * {
+  transform: rotate(45deg);
+  z-index: 10;
+  display: block;
+}
+
+.marker-pin.well {
+  background: #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.marker-pin.open {
+  background: #0ea5e9;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  animation: marker-pulse 2s infinite;
+}
+
+.marker-pin.closed {
+  background: #475569;
+}
+
+@keyframes marker-pulse {
+  0% { transform: rotate(-45deg) scale(1); }
+  50% { transform: rotate(-45deg) scale(1.1); box-shadow: 0 0 30px rgba(14, 165, 233, 0.6); }
+  100% { transform: rotate(-45deg) scale(1); }
+}
+
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}

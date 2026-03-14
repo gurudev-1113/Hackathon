@@ -1,0 +1,58 @@
+
+> agri@0.0.0 lint
+> eslint .
+
+
+/home/arunkumar/Hackathon2/Agri/src/components/MobileSMSAlert.jsx
+  36:9  error  Error: Cannot access variable before it is declared
+
+`sendTwilioSMS` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  34 |       const smsSentKey = `sms_sent_${alert.id}`;
+  35 |       if (!sessionStorage.getItem(smsSentKey)) {
+> 36 |         sendTwilioSMS(alert.message);
+     |         ^^^^^^^^^^^^^ `sendTwilioSMS` accessed before it is declared
+  37 |         sessionStorage.setItem(smsSentKey, 'true');
+  38 |       }
+  39 |     });
+
+  41 |   }, [dismissedAlerts]);
+  42 |
+> 43 |   async function sendTwilioSMS(messageText) {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |     // In a real app, this should be done via a backend server to protect API keys.
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 |     // For this prototype, we demonstrate the fetch call here.
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 89 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 90 |   };
+     | ^^^^ `sendTwilioSMS` is declared here
+  91 |
+  92 |   const dismissAlert = (id) => {
+  93 |     setDismissedAlerts(prev => {  react-hooks/immutability
+
+/home/arunkumar/Hackathon2/Agri/src/pages/Alerts.jsx
+  49:37  error  '_b' is defined but never used  no-unused-vars
+
+/home/arunkumar/Hackathon2/Agri/src/pages/Dashboard.jsx
+  184:9   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/purity')
+  188:21  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  186 |           // eslint-disable-next-line react-hooks/purity
+  187 |           13.065 + (Math.random() - 0.5) * 0.2,
+> 188 |           74.805 + (Math.random() - 0.5) * 0.2
+      |                     ^^^^^^^^^^^^^ Cannot call impure function
+  189 |         ];
+  190 |       }
+  191 |         react-hooks/purity
+
+/home/arunkumar/Hackathon2/Agri/src/services/authService.js
+  128:14  error  '_error' is defined but never used  no-unused-vars
+
+✖ 5 problems (4 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

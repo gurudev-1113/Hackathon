@@ -1,0 +1,96 @@
+{
+  "description": "Sample Dataset Output - OrbiPulse Valve Network",
+  "total_valves": 20,
+  "generated_at": "2026-03-13T19:42:00Z",
+  "reference": "EA/13/2026",
+  "valves": [
+    {
+      "device_id": "VALVE_01",
+      "name": "Main Field Valve 1",
+      "lat": 13.04,
+      "lon": 74.81,
+      "status": "OPEN",
+      "battery": 87,
+      "motor_current": 4.5,
+      "temperature": 41,
+      "movement_time": 4,
+      "rssi": 40,
+      "flow_lpm": 15.2,
+      "location_description": "North-East sector of main farm"
+    },
+    {
+      "device_id": "VALVE_02", 
+      "name": "Greenhouse Valve A",
+      "lat": 13.05,
+      "lon": 74.82,
+      "status": "CLOSED",
+      "battery": 92,
+      "motor_current": 0,
+      "temperature": 39,
+      "movement_time": 3,
+      "rssi": 45,
+      "flow_lpm": 0,
+      "location_description": "Greenhouse section A"
+    },
+    {
+      "device_id": "VALVE_03",
+      "name": "Orchard Row 1",
+      "lat": 13.045,
+      "lon": 74.815,
+      "status": "OPEN",
+      "battery": 78,
+      "motor_current": 5.2,
+      "temperature": 43,
+      "movement_time": 5,
+      "rssi": 38,
+      "flow_lpm": 18.7,
+      "location_description": "Orchard first row"
+    },
+    {
+      "device_id": "VALVE_04",
+      "name": "West Border Valve",
+      "lat": 13.038,
+      "lon": 74.805,
+      "status": "CLOSED", 
+      "battery": 85,
+      "motor_current": 0,
+      "temperature": 38,
+      "movement_time": 2,
+      "rssi": 42,
+      "flow_lpm": 0,
+      "location_description": "Western boundary irrigation"
+    },
+    {
+      "device_id": "VALVE_05",
+      "name": "Central Pivot Valve",
+      "lat": 13.065,
+      "lon": 74.805,
+      "status": "OPEN",
+      "battery": 90,
+      "motor_current": 4.8,
+      "temperature": 40,
+      "movement_time": 4,
+      "rssi": 44,
+      "flow_lpm": 22.1,
+      "location_description": "Central pivot irrigation system"
+    }
+  ],
+  "map_coordinates_info": {
+    "center_lat": 13.065,
+    "center_lon": 74.805,
+    "zoom_level": 13,
+    "coordinate_system": "WGS84",
+    "coverage_area_km2": 2.5
+  },
+  "search_capabilities": {
+    "searchable_fields": ["name", "device_id"],
+    "map_integration": "real-time coordinate display",
+    "search_features": [
+      "Search by valve name",
+      "Search by device ID", 
+      "Auto-complete suggestions",
+      "Click to center map on valve",
+      "Display lat/lon in search results"
+    ]
+  }
+}

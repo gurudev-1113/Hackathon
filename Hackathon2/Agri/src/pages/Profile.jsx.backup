@@ -1,0 +1,1129 @@
+import { useState, useEffect } from 'react';
+import { UserCircle, Mail, Shield, Camera, X, Plus, Home, Settings, Trash2, Wheat, Trees, MapPin, Droplet, Key, Eye, EyeOff, Lock, CheckCircle2 } from 'lucide-react';
+import { useValves } from '../context/ValveContext';
+
+export default function Profile() {
+  const { valves } = useValves();
+  const [user, setUser] = useState({
+    email: 'admin@gmail.com',
+    mobile: '+919876543210',
+    role: 'System Administrator',
+    name: 'Admin User'
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState({
+    email: 'admin@gmail.com',
+    mobile: '+919876543210',
+    role: 'System Administrator',
+    name: 'Admin User'
+  });
+  const [activeSection, setActiveSection] = useState('profile');
+  
+  const [farms, setFarms] = useState([]);
+  const [selectedFarm, setSelectedFarm] = useState(null);
+  const [showAddFarm, setShowAddFarm] = useState(false);
+  const [editingFarm, setEditingFarm] = useState(null);
+  const [showAddValve, setShowAddValve] = useState(false);
+  const [selectedFarmForValve, setSelectedFarmForValve] = useState(null);
+  const [newValve, setNewValve] = useState({
+    name: '',
+    location: '',
+    type: 'valve'
+  });
+
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isEditingRole, setIsEditingRole] = useState(false);
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('userEmail');
+    const storedMobile = localStorage.getItem('userMobile');
+    const savedFarms = localStorage.getItem('farms');
+    const savedProfilePhoto = localStorage.getItem('userProfilePhoto');
+    const savedRole = localStorage.getItem('userRole');
+    
+    if (storedEmail) {
+      const userData = { 
+        email: storedEmail, 
+        mobile: storedMobile || 'Not provided',
+        name: storedEmail.split('@')[0],
+        role: savedRole || (storedEmail === 'admin@gmail.com' ? 'System Administrator' : 'Farm Operator'),
+        profilePhoto: savedProfilePhoto
+      };
+      setUser(userData);
+      setEditedUser(userData);
+    }
+    
+    if (savedFarms) {
+      setFarms(JSON.parse(savedFarms));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (farms.length > 0) {
+      localStorage.setItem('farms', JSON.stringify(farms));
+    }
+  }, [farms]);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedUser(user);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedUser(user);
+  };
+
+  const handleSave = () => {
+    setUser(editedUser);
+    localStorage.setItem('userEmail', editedUser.email);
+    localStorage.setItem('userMobile', editedUser.mobile);
+    localStorage.setItem('userRole', editedUser.role);
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditedUser(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePasswordReset = () => {
+    setShowPasswordReset(true);
+    setActiveSection('security');
+  };
+
+  const handleResetSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!resetEmail.trim()) {
+      alert('Please enter your email address');
+      return;
+    }
+    
+    if (newPassword.length < 8) {
+      alert('Password must be at least 8 characters long');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    setIsResetting(true);
+    
+    setTimeout(() => {
+      setIsResetting(false);
+      setResetSuccess(true);
+      setResetEmail('');
+      setNewPassword('');
+      setConfirmPassword('');
+      
+      setTimeout(() => {
+        setResetSuccess(false);
+        setShowPasswordReset(false);
+        setActiveSection('profile');
+      }, 2000);
+    }, 1500);
+  };
+
+  const handleAddFarm = () => {
+    if (editingFarm) {
+      setFarms(farms.map(f => f.id === editingFarm.id ? { ...f, ...editingFarm } : f));
+      setEditingFarm(null);
+    } else {
+      const farm = {
+        id: Date.now().toString(),
+        name: '',
+        location: '',
+        size: '',
+        cropType: '',
+        description: '',
+        valveCount: 0,
+        createdAt: new Date().toISOString()
+      };
+      setFarms([...farms, farm]);
+    }
+    
+    setEditingFarm({
+      name: '',
+      location: '',
+      size: '',
+      cropType: '',
+      description: ''
+    });
+    setShowAddFarm(false);
+  };
+
+  const handleEditFarm = (farm) => {
+    setEditingFarm(farm);
+    setShowAddFarm(true);
+  };
+
+  const handleDeleteFarm = (farmId) => {
+    if (window.confirm('Are you sure you want to delete this farm? This action cannot be undone.')) {
+      setFarms(farms.filter(f => f.id !== farmId));
+      if (selectedFarm?.id === farmId) {
+        setSelectedFarm(null);
+      }
+    }
+  };
+
+  const handleSelectFarm = (farm) => {
+    setSelectedFarm(farm);
+  };
+
+  const handleAddValve = () => {
+    if (selectedFarmForValve && newValve.name.trim()) {
+      const valve = {
+        id: Date.now().toString(),
+        device_id: `VALVE_${Date.now().toString().slice(-6)}`,
+        name: newValve.name,
+        location: newValve.location,
+        type: newValve.type,
+        lat: 13.065 + (Math.random() - 0.5) * 0.1,
+        lon: 74.805 + (Math.random() - 0.5) * 0.1,
+        status: 'CLOSED',
+        battery: Math.floor(Math.random() * 40) + 60,
+        motor_current: 0,
+        temperature: Math.floor(Math.random() * 15) + 20,
+        movement_time: 0,
+        flow_rate: 0,
+        farmId: selectedFarmForValve.id,
+        createdAt: new Date().toISOString()
+      };
+
+      setFarms(farms.map(f => 
+        f.id === selectedFarmForValve.id 
+          ? { ...f, valveCount: f.valveCount + 1 }
+          : f
+      ));
+
+      setNewValve({ name: '', location: '', type: 'valve' });
+      setShowAddValve(false);
+      alert(`Valve "${valve.name}" added to ${selectedFarmForValve.name} successfully!`);
+    }
+  };
+
+  const getValvesForFarm = (farmId) => {
+    return valves.filter(v => Math.random() > 0.5);
+  };
+
+  const cropTypes = ['Wheat', 'Rice', 'Corn', 'Soybeans', 'Cotton', 'Vegetables', 'Fruits', 'Other'];
+
+  const getInfrastructureTypeText = (type) => {
+    if (type === 'valve') return 'Valve';
+    if (type === 'borehole') return 'Borehole';
+    if (type === 'well') return 'Well';
+    return 'Valve';
+  };
+
+  // Profile photo functions
+  const handlePhotoOption = async (option) => {
+    setShowPhotoOptions(false);
+    
+    try {
+      if (option === 'camera') {
+        // Access camera with proper constraints
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'user' },
+          audio: false 
+        });
+        
+        // Create video element and capture photo
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        
+        // Wait for video to be ready
+        await new Promise(resolve => {
+          video.onloadedmetadata = resolve;
+        });
+        
+        // Create canvas to capture photo
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        // Convert to data URL
+        const photoData = canvas.toDataURL('image/jpeg', 0.8);
+        setProfilePhoto(photoData);
+        localStorage.setItem('userProfilePhoto', photoData);
+        setUser(prev => ({ ...prev, profilePhoto: photoData }));
+        
+        // Stop camera stream
+        stream.getTracks().forEach(track => track.stop());
+        
+        alert('Photo captured successfully!');
+      } else if (option === 'gallery') {
+        // Access gallery
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = handlePhotoUpload;
+        input.click();
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      // Fallback to gallery if camera fails
+      if (option === 'camera') {
+        alert('Camera access denied or unavailable. Opening gallery instead.');
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = handlePhotoUpload;
+        input.click();
+      }
+    }
+  };
+
+  const handlePhotoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setIsUploading(true);
+      
+      // Create object URL for preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePhoto(e.target.result);
+        setIsUploading(false);
+        
+        // Save to localStorage
+        localStorage.setItem('userProfilePhoto', e.target.result);
+        
+        // Update user data
+        setUser(prev => ({ ...prev, profilePhoto: e.target.result }));
+        
+        alert('Profile photo updated successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setProfilePhoto(null);
+    localStorage.removeItem('userProfilePhoto');
+    setUser(prev => ({ ...prev, profilePhoto: null }));
+    setShowPhotoOptions(false);
+    alert('Profile photo removed successfully!');
+  };
+
+  // Role change functions
+  const handleEditRole = () => {
+    setIsEditingRole(true);
+  };
+
+  const handleRoleChange = (newRole) => {
+    setUser(prev => ({ ...prev, role: newRole }));
+    setEditedUser(prev => ({ ...prev, role: newRole }));
+    localStorage.setItem('userRole', newRole);
+    setIsEditingRole(false);
+    alert(`Role changed to ${newRole} successfully!`);
+  };
+
+  const handleCancelRoleChange = () => {
+    setIsEditingRole(false);
+    setEditedUser(prev => ({ ...prev, role: user.role }));
+  };
+
+  const handleSaveRoleChange = () => {
+    setUser(editedUser);
+    localStorage.setItem('userEmail', editedUser.email);
+    localStorage.setItem('userMobile', editedUser.mobile);
+    localStorage.setItem('userRole', editedUser.role);
+    setIsEditingRole(false);
+    alert('Role updated successfully!');
+  };
+
+  return (
+    <div className="min-h-screen bg-main font-sans text-textH">
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-15%] left-[-10%] w-2/3 h-2/3 bg-indigo-900/30 rounded-full blur-[150px] mix-blend-screen animate-blob" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-1/3 h-1/3 bg-emerald-900/30 rounded-full blur-[150px] mix-blend-screen animate-blob animation-delay-2000" />
+        <div className="absolute top-[40%] right-[-5%] w-96 h-96 bg-cyan-900/20 rounded-full blur-[150px] mix-blend-screen animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative z-10">
+        <header className="bg-main/80 backdrop-blur-md border-b border-border/20 pb-6">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-white rounded-xl shadow-lg shadow-green-500/20 p-1 flex items-center justify-center overflow-hidden">
+                  <img src="/logo.png" alt="Agri Logo" className="w-full h-full object-contain" onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='block'; }} />
+                  <Droplet className="text-green-600 hidden" size={24} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-black bg-gradient-to-r from-textH to-accent bg-clip-text text-transparent">
+                    User & Farm Management
+                  </h1>
+                  <p className="text-textH/60">Manage your profile, farms, and account security</p>
+                </div>
+              </div>
+              <nav className="flex space-x-6">
+                <button
+                  onClick={() => setActiveSection('profile')}
+                  className={`px-6 py-3 font-medium transition-all duration-300 border-b-2 ${
+                    activeSection === 'profile'
+                      ? 'text-accent border-accent'
+                      : 'text-textH/60 border-transparent hover:text-textH'
+                  }`}
+                >
+                  <UserCircle size={18} className="mr-2" />
+                  Profile
+                </button>
+                <button
+                  onClick={() => setActiveSection('farms')}
+                  className={`px-6 py-3 font-medium transition-all duration-300 border-b-2 ${
+                    activeSection === 'farms'
+                      ? 'text-accent border-accent'
+                      : 'text-textH/60 border-transparent hover:text-textH'
+                  }`}
+                >
+                  <Home size={18} className="mr-2" />
+                  My Farms
+                </button>
+                <button
+                  onClick={() => setActiveSection('add-farm')}
+                  className={`px-6 py-3 font-medium transition-all duration-300 border-b-2 ${
+                    activeSection === 'add-farm'
+                      ? 'text-accent border-accent'
+                      : 'text-textH/60 border-transparent hover:text-textH'
+                  }`}
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Farm
+                </button>
+                <button
+                  onClick={() => setActiveSection('security')}
+                  className={`px-6 py-3 font-medium transition-all duration-300 border-b-2 ${
+                    activeSection === 'security'
+                      ? 'text-accent border-accent'
+                      : 'text-textH/60 border-transparent hover:text-textH'
+                  }`}
+                >
+                  <Key size={18} className="mr-2" />
+                  Security
+                </button>
+              </nav>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-6 py-8">
+          {activeSection === 'profile' && (
+            <div className="space-y-8">
+              <div className="bg-main/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-border/20">
+                <div className="flex items-start gap-8">
+                  <div className="flex-shrink-0">
+                    <div className="relative group">
+                      <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/40 p-1 flex items-center justify-center shadow-2xl group-hover:shadow-accent/50 transition-all duration-300 overflow-hidden">
+                        {profilePhoto ? (
+                          <img 
+                            src={profilePhoto} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover rounded-2xl"
+                          />
+                        ) : (
+                          <UserCircle size={64} className="text-accent" />
+                        )}
+                      </div>
+                      
+                      {/* Photo Options Menu */}
+                      <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isUploading ? (
+                          <div className="text-white text-center">
+                            <div className="w-8 h-8 border-2 border-white/30 border-t-white/60 animate-spin rounded-full mx-auto mb-2"></div>
+                            <p className="text-sm">Uploading...</p>
+                          </div>
+                        ) : (
+                          <div className="text-white text-center space-y-3">
+                            <button
+                              onClick={() => setShowPhotoOptions(true)}
+                              className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium hover:bg-white/30 transition-colors"
+                            >
+                              <Camera size={16} className="mr-2" />
+                              Change Photo
+                            </button>
+                            {profilePhoto && (
+                              <button
+                                onClick={handleRemovePhoto}
+                                className="bg-red-500/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-500/30 transition-colors"
+                              >
+                                <X size={16} className="mr-2" />
+                                Remove Photo
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-6">
+                    <div>
+                      <h2 className="text-2xl font-bold text-textH mb-6">Personal Information</h2>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-textH/80 mb-2">Full Name</label>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editedUser.name}
+                                onChange={(e) => handleInputChange('name', e.target.value)}
+                                className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              />
+                            ) : (
+                              <div className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 text-textH/90">
+                                <p className="font-medium">{user.name}</p>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-textH/80 mb-2">Email Address</label>
+                            {isEditing ? (
+                              <input
+                                type="email"
+                                value={editedUser.email}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              />
+                            ) : (
+                              <div className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 text-textH/90">
+                                <p className="font-medium">{user.email}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-textH/80 mb-2">Mobile Number</label>
+                            {isEditing ? (
+                              <input
+                                type="tel"
+                                value={editedUser.mobile}
+                                onChange={(e) => handleInputChange('mobile', e.target.value)}
+                                className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              />
+                            ) : (
+                              <div className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 text-textH/90">
+                                <p className="font-medium">{user.mobile}</p>
+                              </div>
+                            )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-textH/80 mb-2">Email Address</label>
+                          {isEditing ? (
+                            <input
+                              type="email"
+                              value={editedUser.email}
+                              onChange={(e) => handleInputChange('email', e.target.value)}
+                              className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                            />
+                          ) : (
+                            <div className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 text-textH/90">
+                              <p className="font-medium">{user.email}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-semibold text-textH/80 mb-2">Role</label>
+                          {isEditingRole ? (
+                            <div className="space-y-2">
+                              <select
+                                value={editedUser.role}
+                                onChange={(e) => handleInputChange('role', e.target.value)}
+                                className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              >
+                                <option value="Farm Operator">Farm Operator</option>
+                                <option value="System Administrator">System Administrator</option>
+                                <option value="Farm Manager">Farm Manager</option>
+                                <option value="Field Technician">Field Technician</option>
+                                <option value="Agronomist">Agronomist</option>
+                                <option value="Irrigation Specialist">Irrigation Specialist</option>
+                              </select>
+                              <div className="flex gap-2 mt-2">
+                                <button
+                                  onClick={handleCancelRoleChange}
+                                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-textH/80 rounded-lg font-medium transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={handleSaveRoleChange}
+                                  className="flex-1 px-4 py-2 bg-accent hover:bg-blue-500 text-white rounded-lg font-medium transition-all duration-300 shadow-lg shadow-accent/50"
+                                >
+                                  Save Role
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 text-textH/90 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Shield className="text-accent" size={20} />
+                                <span className="font-medium">{user.role}</span>
+                              </div>
+                              <button
+                                onClick={handleEditRole}
+                                className="p-2 bg-slate-700 hover:bg-slate-600 text-textH/80 rounded-lg transition-colors"
+                                title="Change Role"
+                              >
+                                <Settings size={16} />
+                              </button>
+                            </div>
+                          )}
+
+                        </div>
+                        <div>
+                          {/* Second column - can be empty or add more fields */}
+                        </div>
+                    </div>
+                  </div>
+            </div>
+          )}
+
+          {activeSection === 'farms' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {farms.map(farm => (
+                  <div key={farm.id} className="bg-main/60 backdrop-blur-xl rounded-3xl p-6 hover:border-accent/50 transition-all duration-300 cursor-pointer transform hover:scale-105 border border-border/20" onClick={() => handleSelectFarm(farm)}>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center">
+                          <Home size={20} className="text-accent" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-textH">{farm.name}</h3>
+                          <p className="text-sm text-textH/60">{farm.location || 'No location specified'}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditFarm(farm);
+                          }}
+                          className="p-2 bg-slate-700 hover:bg-slate-600 text-textH/80 rounded-lg transition-colors"
+                          title="Edit Farm"
+                        >
+                          <Settings size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteFarm(farm.id);
+                          }}
+                          className="p-2 bg-red-900/50 hover:bg-red-900/70 text-red-400 rounded-lg transition-colors"
+                          title="Delete Farm"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {farm.size && (
+                        <div className="flex items-center gap-2">
+                          <Wheat className="text-amber-400" size={16} />
+                          <span className="text-sm text-textH/80">Size: <span className="font-medium text-textH">{farm.size}</span></span>
+                        </div>
+                      )}
+
+                      {farm.cropType && (
+                        <div className="flex items-center gap-2">
+                          <Trees className="text-green-400" size={16} />
+                          <span className="text-sm text-textH/80">Crop: <span className="font-medium text-textH">{farm.cropType}</span></span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                        <span className="text-xs text-textH/40">
+                          {getValvesForFarm(farm.id).length} valves • {farm.valveCount || 0} assigned
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedFarmForValve(farm);
+                            setActiveSection('add-farm');
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-accent text-white hover:bg-blue-500"
+                        >
+                          Add Infrastructure
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {farms.length === 0 && (
+                <div className="text-center py-16">
+                  <div className="w-24 h-24 bg-slate-700/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <Home className="text-slate-400" size={48} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-textH mb-4">No Farms Added Yet</h3>
+                  <p className="text-textH/60 mb-8 max-w-md mx-auto">Create your first farm to get started with comprehensive farm management and infrastructure tracking.</p>
+                  <button
+                    onClick={() => setActiveSection('add-farm')}
+                    className="bg-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-accent/50"
+                  >
+                    <Plus size={20} className="mr-2" />
+                    Create Your First Farm
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'add-farm' && (
+            <div className="space-y-6">
+              <div className="bg-main/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-border/20">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-textH">
+                    {editingFarm ? 'Edit Farm' : 'Create New Farm'}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setShowAddFarm(false);
+                      setEditingFarm(null);
+                      setActiveSection('farms');
+                    }}
+                    className="text-slate-400 hover:text-textH transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Farm Name *</label>
+                      <input
+                        type="text"
+                        value={editingFarm?.name || ''}
+                        onChange={(e) => setEditingFarm(prev => prev ? { ...prev, name: e.target.value } : { name: e.target.value })}
+                        className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                        placeholder="Enter farm name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Location</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-4 text-slate-400" size={20} />
+                        <input
+                          type="text"
+                          value={editingFarm?.location || ''}
+                          onChange={(e) => setEditingFarm(prev => prev ? { ...prev, location: e.target.value } : { location: e.target.value })}
+                          className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                          placeholder="Enter farm location/address"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Farm Size</label>
+                      <input
+                        type="text"
+                        value={editingFarm?.size || ''}
+                        onChange={(e) => setEditingFarm(prev => prev ? { ...prev, size: e.target.value } : { size: e.target.value })}
+                        className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                        placeholder="e.g., 50 acres, 25 hectares"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Crop Type</label>
+                      <select
+                        value={editingFarm?.cropType || ''}
+                        onChange={(e) => setEditingFarm(prev => prev ? { ...prev, cropType: e.target.value } : { cropType: e.target.value })}
+                        className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                      >
+                        <option value="">Select crop type</option>
+                        {cropTypes.map(crop => (
+                          <option key={crop} value={crop}>{crop}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-textH/80 mb-2">Description</label>
+                    <textarea
+                      value={editingFarm?.description || ''}
+                      onChange={(e) => setEditingFarm(prev => prev ? { ...prev, description: e.target.value } : { description: e.target.value })}
+                      className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm resize-none"
+                      rows="3"
+                      placeholder="Enter farm description (optional)"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-6">
+                  <button
+                    onClick={() => {
+                      setShowAddFarm(false);
+                      setEditingFarm(null);
+                      setActiveSection('farms');
+                    }}
+                    className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-textH/80 rounded-xl font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddFarm}
+                    className="flex-1 px-6 py-3 bg-accent hover:bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 shadow-lg shadow-accent/50"
+                  >
+                    {editingFarm ? 'Update Farm' : 'Create Farm'}
+                  </button>
+                </div>
+              </div>
+
+              {selectedFarmForValve && (
+                <div className="bg-main/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-border/20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Droplet className="text-accent" size={24} />
+                    <div>
+                      <h2 className="text-2xl font-bold text-textH">Add Infrastructure to {selectedFarmForValve.name}</h2>
+                      <p className="text-textH/60">Add irrigation valves, boreholes, or wells to this farm</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Infrastructure Name *</label>
+                      <input
+                        type="text"
+                        value={newValve.name}
+                        onChange={(e) => setNewValve({ ...newValve, name: e.target.value })}
+                        className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                        placeholder="Enter valve/borehole/well name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Location</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-4 text-slate-400" size={20} />
+                        <input
+                          type="text"
+                          value={newValve.location}
+                          onChange={(e) => setNewValve({ ...newValve, location: e.target.value })}
+                          className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                          placeholder="Enter location within farm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-textH/80 mb-2">Type</label>
+                      <select
+                        value={newValve.type}
+                        onChange={(e) => setNewValve({ ...newValve, type: e.target.value })}
+                        className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                      >
+                        <option value="valve">Irrigation Valve</option>
+                        <option value="borehole">Borehole</option>
+                        <option value="well">Well</option>
+                      </select>
+                    </div>
+
+                    <div className="flex gap-4 pt-6">
+                      <button
+                        onClick={() => {
+                          setNewValve({ name: '', location: '', type: 'valve' });
+                          setShowAddValve(false);
+                        }}
+                        className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-textH/80 rounded-xl font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleAddValve}
+                        className="flex-1 px-6 py-3 bg-accent hover:bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 shadow-lg shadow-accent/50"
+                      >
+                        Add {getInfrastructureTypeText(newValve.type)}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'security' && (
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-main/60 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-border/20">
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-textH mb-2">Security Settings</h2>
+                  <p className="text-textH/60">Manage your account security and password</p>
+                </div>
+
+                {!showPasswordReset ? (
+                  <div className="space-y-6">
+                    <div>
+                      <button
+                        onClick={() => {
+                          setShowPasswordReset(false);
+                          setActiveSection('profile');
+                        }}
+                        className="flex items-center text-slate-400 hover:text-textH transition-colors mb-6"
+                      >
+                        <X size={20} className="mr-2" />
+                        Back to Profile
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-textH mb-4">Change Password</h3>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-4 text-slate-400" size={20} />
+                          <input
+                            type="password"
+                            value={editedUser.currentPassword || ''}
+                            onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                            className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                            placeholder="Current password"
+                          />
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-4 text-slate-400" size={20} />
+                          <input
+                            type="password"
+                            value={editedUser.newPassword || ''}
+                            onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                            className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                            placeholder="New password"
+                          />
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-4 text-slate-400" size={20} />
+                          <input
+                            type="password"
+                            value={editedUser.confirmPassword || ''}
+                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                            className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                            placeholder="Confirm new password"
+                          />
+                        </div>
+                        <div className="flex gap-4 pt-6">
+                          <button
+                            onClick={() => {
+                              setEditedUser(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+                            }}
+                            className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-textH/80 rounded-xl font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (editedUser.newPassword && editedUser.confirmPassword && editedUser.newPassword === editedUser.confirmPassword) {
+                                setUser(prev => ({ ...prev, password: editedUser.newPassword }));
+                                localStorage.setItem('userPassword', editedUser.newPassword);
+                                setEditedUser(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+                                alert('Password updated successfully!');
+                              } else {
+                                alert('Please fill in all password fields and ensure passwords match');
+                              }
+                            }}
+                            className="flex-1 px-6 py-3 bg-accent hover:bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 shadow-lg shadow-accent/50"
+                          >
+                            Update Password
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-border/50 pt-8">
+                      <h3 className="text-lg font-semibold text-textH mb-4">Reset Password</h3>
+                      <p className="text-textH/60 mb-6">If you've forgotten your password, you can reset it using your email address.</p>
+                      
+                      <form onSubmit={handleResetSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-textH/80 mb-2">Email Address</label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-4 text-slate-400" size={20} />
+                            <input
+                              type="email"
+                              value={resetEmail}
+                              onChange={(e) => setResetEmail(e.target.value)}
+                              className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              placeholder="Enter your email address"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-textH/80 mb-2">New Password</label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-4 text-slate-400" size={20} />
+                            <input
+                              type={showNewPassword ? "text" : "password"}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              placeholder="Enter new password"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="absolute right-3 top-4 text-slate-400 hover:text-textH transition-colors"
+                            >
+                              {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-textH/80 mb-2">Confirm Password</label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-4 text-slate-400" size={20} />
+                            <input
+                              type={showNewPassword ? "text" : "password"}
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              className="w-full bg-slate-800/50 border border-slate-600 rounded-xl p-4 pl-12 text-white font-medium focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-slate-400 backdrop-blur-sm"
+                              placeholder="Confirm new password"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="absolute right-3 top-4 text-slate-400 hover:text-textH transition-colors"
+                            >
+                              {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={isResetting}
+                          className="w-full px-6 py-3 bg-accent hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-300 shadow-lg shadow-accent/50 flex items-center justify-center"
+                        >
+                          {isResetting ? (
+                            <>
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white/60 animate-spin rounded-full mr-3"></div>
+                              Resetting Password...
+                            </>
+                          ) : (
+                            <>
+                              <Key size={18} className="mr-2" />
+                              Reset Password
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    {resetSuccess ? (
+                      <div className="space-y-6">
+                        <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                          <CheckCircle2 size={48} className="text-emerald-500" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-textH mb-4">Password Reset Successful!</h3>
+                        <p className="text-textH/60 mb-8 max-w-md mx-auto">Your password has been reset successfully. You can now log in with your new password.</p>
+                        <button
+                          onClick={() => {
+                            setResetSuccess(false);
+                            setActiveSection('profile');
+                          }}
+                          className="bg-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-accent/50"
+                        >
+                          Back to Profile
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="w-20 h-20 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                          <Key className="text-slate-400" size={48} />
+                        </div>
+                        <h3 className="text-2xl font-bold text-textH mb-4">Password Reset Requested</h3>
+                        <p className="text-textH/60 mb-8 max-w-md mx-auto">A password reset link has been sent to your email address. Please check your inbox and follow the instructions to reset your password.</p>
+                        <button
+                          onClick={() => {
+                            setResetSuccess(false);
+                            setActiveSection('profile');
+                          }}
+                          className="bg-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-accent/50"
+                        >
+                          Back to Profile
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Photo Options Modal */}
+      {showPhotoOptions && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-main rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-border/20">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-textH">Update Profile Photo</h3>
+              <button
+                onClick={() => setShowPhotoOptions(false)}
+                className="text-slate-400 hover:text-textH transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => handlePhotoOption('camera')}
+                className="w-full bg-accent hover:bg-blue-500 text-white rounded-xl p-4 font-medium transition-all duration-300 shadow-lg shadow-accent/50 flex items-center justify-center gap-3"
+              >
+                <Camera size={20} />
+                <span>Take Photo</span>
+              </button>
+
+              <button
+                onClick={() => handlePhotoOption('gallery')}
+                className="w-full bg-slate-700 hover:bg-slate-600 text-white rounded-xl p-4 font-medium transition-colors flex items-center justify-center gap-3"
+              >
+                <div className="w-5 h-5 rounded border-2 border-white/60 flex items-center justify-center">
+                  <div className="w-3 h-0.5 bg-white rounded-full"></div>
+                  <div className="w-3 h-0.5 bg-white rounded-full ml-1"></div>
+                </div>
+                <span>Choose from Gallery</span>
+              </button>
+
+              <button
+                onClick={() => setShowPhotoOptions(false)}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-textH/80 rounded-xl p-4 font-medium transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "SCH_001",
+    "device_id": "VALVE_02",
+    "start_time": "14:00",
+    "duration": 30,
+    "status": "pending"
+  },
+  {
+    "id": "SCH_002",
+    "device_id": "VALVE_01",
+    "start_time": "06:00",
+    "duration": 45,
+    "status": "completed"
+  }
+]
