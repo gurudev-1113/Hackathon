@@ -1,0 +1,11 @@
+name: Create Production Builds
+
+jobs:
+  build_android:
+    type: build # This job type creates a production build for Android
+    params:
+      platform: android
+  build_windows:
+    type: build # This job type creates a production build for Windows
+    params:
+      platform: windows
